@@ -14,7 +14,7 @@
 //==============================================================================
 /**
 */
-class SimpleDelayAudioProcessorEditor  : public juce::AudioProcessorEditor
+class SimpleDelayAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener
 {
 public:
     SimpleDelayAudioProcessorEditor (SimpleDelayAudioProcessor&);
@@ -23,8 +23,11 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+    void sliderValueChanged(juce::Slider* slider) override;
 
 private:
+    juce::Slider masterGainSlider;
+
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     SimpleDelayAudioProcessor& audioProcessor;
