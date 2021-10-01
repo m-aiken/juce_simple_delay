@@ -93,8 +93,10 @@ void SimpleDelayAudioProcessor::changeProgramName (int index, const juce::String
 //==============================================================================
 void SimpleDelayAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    const int numInputChannels = getTotalNumInputChannels();
+    const int delayBufferSize = 2 * (sampleRate * samplesPerBlock);
+
+    delayBuffer.setSize(numInputChannels, delayBufferSize);
 }
 
 void SimpleDelayAudioProcessor::releaseResources()
@@ -140,12 +142,31 @@ void SimpleDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        auto* channelData = buffer.getWritePointer (channel);
+        const int bufferLength      = buffer.getNumSamples();
+        const int delayBufferLength = delayBuffer.getNumSamples();
 
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        const float* bufferData      = buffer.getReadPointer(channel);
+        const float* delayBufferData = delayBuffer.getReadPointer(channel);
+
+        if (delayBufferLength > bufferLength + writePosition)
         {
-            channelData[sample] *= juce::Decibels::decibelsToGain(masterGain);
+            delayBuffer.copyFromWithRamp(channel, writePosition, bufferData, bufferLength, 0.8f, 0.8f);
         }
+        else
+        {
+            const int bufferRemaining = delayBufferLength - writePosition;
+            delayBuffer.copyFromWithRamp(channel, writePosition, bufferData, bufferRemaining, 0.8f, 0.8f);
+            delayBuffer.copyFromWithRamp(channel, 0, bufferData, bufferLength - bufferRemaining, 0.8f, 0.8f);
+        }
+
+        writePosition += bufferLength;
+        writePosition %= delayBufferLength;
+//        auto* channelData = buffer.getWritePointer (channel);
+//
+//        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+//        {
+//            channelData[sample] *= juce::Decibels::decibelsToGain(masterGain);
+//        }
     }
 }
 

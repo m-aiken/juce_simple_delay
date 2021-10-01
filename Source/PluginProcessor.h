@@ -55,6 +55,8 @@ public:
 
     float masterGain;
 private:
+    juce::AudioBuffer<float> delayBuffer;
+    int writePosition { 0 };
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDelayAudioProcessor)
 };
