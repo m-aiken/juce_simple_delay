@@ -13,13 +13,18 @@
 SimpleDelayAudioProcessorEditor::SimpleDelayAudioProcessorEditor (SimpleDelayAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    // Master Gain Slider
-    masterGainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    masterGainSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 50, 20);
-    masterGainSlider.setRange(-60.f, 0.f, 1.f);
-    masterGainSlider.setValue(-6.f);
-    masterGainSlider.addListener(this);
-    addAndMakeVisible(masterGainSlider);
+    addSliderWithLabel (masterGainSlider, masterGainLabel,
+                        "Master Gain",
+                        -60.f,
+                        0.f,
+                        1.f,
+                        -6.f);
+    addSliderWithLabel (delayTimeSlider, delayTimeLabel,
+                        "Delay Time",
+                        0.f,
+                        1000.f,
+                        1.f,
+                        400.f);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -35,22 +40,45 @@ void SimpleDelayAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (juce::Colours::black);
-
-//    g.setColour (juce::Colours::white);
-//    g.setFont (15.0f);
-//    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
 void SimpleDelayAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-
-    masterGainSlider.setBounds(getWidth() * 0.5f,getHeight() * 0.25f,getWidth() * 0.25f,getHeight() * 0.5f);
+    auto r = getLocalBounds();
+    auto topTwenty = r.removeFromTop (getHeight() * 0.2f);
+    auto bottomTwenty = r.removeFromBottom (getHeight() * 0.2f);
+    delayTimeSlider.setBounds (r.removeFromLeft(getWidth() * 0.5f));
+    masterGainSlider.setBounds (r);
 }
 
 void SimpleDelayAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
 {
     if (slider == &masterGainSlider)
         audioProcessor.masterGain = masterGainSlider.getValue();
+    if (slider == &delayTimeSlider)
+        audioProcessor.delayTime = delayTimeSlider.getValue();
+}
+
+void SimpleDelayAudioProcessorEditor::addSliderWithLabel(juce::Slider &slider,
+                                                         juce::Label &label,
+                                                         const juce::String &labelText,
+                                                         float rangeMin,
+                                                         float rangeMax,
+                                                         float interval,
+                                                         float defaultValue)
+{
+    // Set slider params
+    slider.setSliderStyle (juce::Slider::SliderStyle::LinearVertical);
+    slider.setTextBoxStyle (juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 50, 20);
+    slider.setRange (rangeMin, rangeMax, interval);
+    slider.setValue (defaultValue);
+    slider.addListener (this);
+    // Set label params
+    addAndMakeVisible (slider);
+    label.setText (labelText, juce::dontSendNotification);
+    label.setJustificationType (juce::Justification::centred);
+    label.attachToComponent (&slider, false);
+    addAndMakeVisible (label);
 }
