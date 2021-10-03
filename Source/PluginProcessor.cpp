@@ -153,16 +153,22 @@ void SimpleDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         for (int i = 0; i < buffer.getNumSamples(); ++i)
         {
 
-            auto delaySample = delayLine.popSample (channel, static_cast<int> (sRate * (delayTime / 1000.f)));
-            auto inputSample = channelDataRead[i];
-            auto delayLineInputSample = std::tanh (inputSample + delayFeedback * delaySample);
-            delayLine.pushSample (channel, delayLineInputSample);
-            auto outputSample = inputSample + delaySample;
-            channelDataWrite[i] = outputSample;
+            channelDataWrite[i] = addDelay(channel, channelDataRead[i]);
 
             channelDataWrite[i] *= juce::Decibels::decibelsToGain(masterGain);
         }
     }
+}
+
+float SimpleDelayAudioProcessor::addDelay(int channel, float inputSample)
+{
+    auto delaySample = delayLine.popSample (channel, static_cast<int> (sRate * (delayTime / 1000.f)));
+
+    auto delayLineInputSample = std::tanh (inputSample + delayFeedback * delaySample);
+
+    delayLine.pushSample (channel, delayLineInputSample);
+
+    return inputSample + delaySample;
 }
 
 //==============================================================================
