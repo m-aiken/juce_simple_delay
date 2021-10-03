@@ -24,8 +24,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    void addSliderWithLabel (juce::Slider &slider, juce::Label &label, const juce::String &labelText,
-                            float rangeMin, float rangeMax, float interval, float defaultValue);
+    void addControlLabel (juce::Slider &slider, juce::Label &label, const juce::String &labelText, bool left);
 
     void sliderValueChanged (juce::Slider* slider) override;
 private:
