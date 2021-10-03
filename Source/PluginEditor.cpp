@@ -23,9 +23,9 @@ SimpleDelayAudioProcessorEditor::SimpleDelayAudioProcessorEditor (SimpleDelayAud
     addSliderWithLabel (delayFeedbackSlider, delayFeedbackLabel,
                         "Delay Feedback",
                         0.f,
-                        100.f,
                         1.f,
-                        25.f);
+                        0.01f,
+                        0.5f);
 
     addSliderWithLabel (masterGainSlider, masterGainLabel,
                         "Master Gain",
