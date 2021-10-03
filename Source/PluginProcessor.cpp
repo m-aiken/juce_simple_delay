@@ -168,7 +168,10 @@ float SimpleDelayAudioProcessor::addDelay(int channel, float inputSample)
 
     delayLine.pushSample (channel, delayLineInputSample);
 
-    return inputSample + delaySample;
+    auto wet = juce::Decibels::decibelsToGain (delayWetLevel);
+    auto dry = juce::Decibels::decibelsToGain (delayDryLevel);
+
+    return (inputSample * dry) + (delaySample * wet);
 }
 
 //==============================================================================

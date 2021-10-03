@@ -27,6 +27,20 @@ SimpleDelayAudioProcessorEditor::SimpleDelayAudioProcessorEditor (SimpleDelayAud
                         0.01f,
                         0.5f);
 
+    addSliderWithLabel (delayWetSlider, delayWetLabel,
+                        "Wet",
+                        -60.f,
+                        0.f,
+                        1.f,
+                        0.f);
+
+    addSliderWithLabel (delayDrySlider, delayDryLabel,
+                        "Dry",
+                        -60.f,
+                        0.f,
+                        1.f,
+                        0.f);
+
     addSliderWithLabel (masterGainSlider, masterGainLabel,
                         "Master Gain",
                         -60.f,
@@ -36,7 +50,7 @@ SimpleDelayAudioProcessorEditor::SimpleDelayAudioProcessorEditor (SimpleDelayAud
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (450, 300);
+    setSize (750, 300);
 }
 
 SimpleDelayAudioProcessorEditor::~SimpleDelayAudioProcessorEditor()
@@ -60,6 +74,8 @@ void SimpleDelayAudioProcessorEditor::resized()
 
     delayTimeSlider.setBounds     (r.removeFromLeft (150));
     delayFeedbackSlider.setBounds (r.removeFromLeft (150));
+    delayWetSlider.setBounds      (r.removeFromLeft (150));
+    delayDrySlider.setBounds      (r.removeFromLeft (150));
     masterGainSlider.setBounds    (r);
 }
 
@@ -70,6 +86,12 @@ void SimpleDelayAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
 
     if (slider == &delayFeedbackSlider)
         audioProcessor.delayFeedback = delayFeedbackSlider.getValue();
+
+    if (slider == &delayWetSlider)
+        audioProcessor.delayWetLevel = delayWetSlider.getValue();
+
+    if (slider == &delayDrySlider)
+        audioProcessor.delayDryLevel = delayDrySlider.getValue();
 
     if (slider == &masterGainSlider)
         audioProcessor.masterGain = masterGainSlider.getValue();

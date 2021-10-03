@@ -35,6 +35,12 @@ private:
     juce::Slider delayFeedbackSlider;
     juce::Label  delayFeedbackLabel;
 
+    juce::Slider delayWetSlider;
+    juce::Label  delayWetLabel;
+
+    juce::Slider delayDrySlider;
+    juce::Label  delayDryLabel;
+
     juce::Slider masterGainSlider;
     juce::Label  masterGainLabel;
     // This reference is provided as a quick way for your editor to
