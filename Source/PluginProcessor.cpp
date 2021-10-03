@@ -93,10 +93,15 @@ void SimpleDelayAudioProcessor::changeProgramName (int index, const juce::String
 //==============================================================================
 void SimpleDelayAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    auto delayBufferSize = sampleRate * 2;
-    delayBuffer.setSize (getTotalNumInputChannels(), static_cast<int> (delayBufferSize));
-
     sRate = sampleRate;
+
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = getTotalNumOutputChannels();
+
+    delayLine.reset();
+    delayLine.prepare(spec);
 }
 
 void SimpleDelayAudioProcessor::releaseResources()
@@ -140,63 +145,17 @@ void SimpleDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    auto mainBufferLength  = buffer.getNumSamples();
-    auto delayBufferLength = delayBuffer.getNumSamples();
-
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        auto* channelData     = buffer.getWritePointer (channel);
+        auto* channelData = buffer.getWritePointer (channel);
 
-        auto* mainBufferData  = buffer.getReadPointer(channel);
-        auto* delayBufferData = delayBuffer.getReadPointer(channel);
-
-        writeToDelayBuffer (channel, mainBufferLength, delayBufferLength, mainBufferData);
-        readFromDelayBuffer (buffer, channel, mainBufferLength, delayBufferLength, delayBufferData,delayTime);
-
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        for (int i = 0; i < buffer.getNumSamples(); ++i)
         {
-            channelData[sample] *= juce::Decibels::decibelsToGain(masterGain);
+            delayLine.pushSample(channel, channelData[i]);
+            channelData[i] += delayLine.popSample(channel, static_cast<int>(sRate * (delayTime / 1000.f)));
+
+            channelData[i] *= juce::Decibels::decibelsToGain(masterGain);
         }
-    }
-
-    delayWritePosition += mainBufferLength;
-    delayWritePosition %= delayBufferLength;
-}
-
-void SimpleDelayAudioProcessor::writeToDelayBuffer (int channel, int mainBufferLength, int delayBufferLength,
-                                                 const float* mainBufferData)
-{
-    if (delayBufferLength > delayWritePosition + mainBufferLength)
-    {
-        delayBuffer.copyFrom (channel, delayWritePosition, mainBufferData, mainBufferLength);
-    }
-    else
-    {
-        auto numCopyAtEnd   = delayBufferLength - delayWritePosition;
-        auto numCopyAtStart = mainBufferLength - numCopyAtEnd;
-        delayBuffer.copyFrom (channel, delayWritePosition, mainBufferData, numCopyAtEnd);
-        delayBuffer.copyFrom (channel, 0, mainBufferData, numCopyAtStart);
-    }
-}
-
-void SimpleDelayAudioProcessor::readFromDelayBuffer (juce::AudioBuffer<float>& buffer, int channel, int
-mainBufferLength, int delayBufferLength, const float*
-delayBufferChannelData, float dTime)
-{
-    int delayTime     = (sRate * dTime / 1000);
-    auto readPosition = static_cast<int> (delayBufferLength + delayWritePosition - delayTime)
-            % delayBufferLength;
-
-    if (delayBufferLength > mainBufferLength + readPosition)
-    {
-        buffer.addFrom (channel, 0, delayBufferChannelData + readPosition, mainBufferLength);
-    }
-    else
-    {
-        auto numCopyAtEnd   = delayBufferLength - readPosition;
-        auto numCopyAtStart = mainBufferLength - numCopyAtEnd;
-        buffer.addFrom (channel, 0, delayBufferChannelData + readPosition, numCopyAtEnd);
-        buffer.addFrom (channel, numCopyAtEnd, delayBufferChannelData, numCopyAtStart);
     }
 }
 

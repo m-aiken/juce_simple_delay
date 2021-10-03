@@ -29,10 +29,14 @@ public:
 
     void sliderValueChanged (juce::Slider* slider) override;
 private:
-    juce::Slider masterGainSlider;
-    juce::Label  masterGainLabel;
     juce::Slider delayTimeSlider;
     juce::Label  delayTimeLabel;
+
+    juce::Slider delayFeedbackSlider;
+    juce::Label  delayFeedbackLabel;
+
+    juce::Slider masterGainSlider;
+    juce::Label  masterGainLabel;
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     SimpleDelayAudioProcessor& audioProcessor;

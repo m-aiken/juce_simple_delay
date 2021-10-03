@@ -13,12 +13,6 @@
 SimpleDelayAudioProcessorEditor::SimpleDelayAudioProcessorEditor (SimpleDelayAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    addSliderWithLabel (masterGainSlider, masterGainLabel,
-                        "Master Gain",
-                        -60.f,
-                        0.f,
-                        1.f,
-                        -6.f);
     addSliderWithLabel (delayTimeSlider, delayTimeLabel,
                         "Delay Time",
                         0.f,
@@ -26,9 +20,23 @@ SimpleDelayAudioProcessorEditor::SimpleDelayAudioProcessorEditor (SimpleDelayAud
                         1.f,
                         400.f);
 
+    addSliderWithLabel (delayFeedbackSlider, delayFeedbackLabel,
+                        "Delay Feedback",
+                        0.f,
+                        100.f,
+                        1.f,
+                        25.f);
+
+    addSliderWithLabel (masterGainSlider, masterGainLabel,
+                        "Master Gain",
+                        -60.f,
+                        0.f,
+                        1.f,
+                        -6.f);
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setSize (450, 300);
 }
 
 SimpleDelayAudioProcessorEditor::~SimpleDelayAudioProcessorEditor()
@@ -49,16 +57,22 @@ void SimpleDelayAudioProcessorEditor::resized()
     auto r = getLocalBounds();
     auto topTwenty = r.removeFromTop (getHeight() * 0.2f);
     auto bottomTwenty = r.removeFromBottom (getHeight() * 0.2f);
-    delayTimeSlider.setBounds (r.removeFromLeft(getWidth() * 0.5f));
-    masterGainSlider.setBounds (r);
+
+    delayTimeSlider.setBounds     (r.removeFromLeft (150));
+    delayFeedbackSlider.setBounds (r.removeFromLeft (150));
+    masterGainSlider.setBounds    (r);
 }
 
 void SimpleDelayAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
 {
-    if (slider == &masterGainSlider)
-        audioProcessor.masterGain = masterGainSlider.getValue();
     if (slider == &delayTimeSlider)
         audioProcessor.delayTime = delayTimeSlider.getValue();
+
+    if (slider == &delayFeedbackSlider)
+        audioProcessor.delayFeedback = delayFeedbackSlider.getValue();
+
+    if (slider == &masterGainSlider)
+        audioProcessor.masterGain = masterGainSlider.getValue();
 }
 
 void SimpleDelayAudioProcessorEditor::addSliderWithLabel(juce::Slider &slider,
