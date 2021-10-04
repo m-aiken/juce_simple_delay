@@ -102,6 +102,9 @@ void SimpleDelayAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 
     delayLine.reset();
     delayLine.prepare(spec);
+
+    smoother.reset(sampleRate, 0.001);
+    smoother.setCurrentAndTargetValue(delayTime);
 }
 
 void SimpleDelayAudioProcessor::releaseResources()
@@ -142,6 +145,8 @@ void SimpleDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    smoother.setTargetValue(delayTime);
+
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
@@ -152,6 +157,7 @@ void SimpleDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 
         for (int i = 0; i < buffer.getNumSamples(); ++i)
         {
+            smoother.getNextValue();
 
             channelDataWrite[i] = addDelay(channel, channelDataRead[i]);
 

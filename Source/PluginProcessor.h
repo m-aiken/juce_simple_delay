@@ -65,6 +65,8 @@ private:
     int sRate { 44100 };
 
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayLine {44100};
+
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> smoother;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDelayAudioProcessor)
 };
