@@ -24,24 +24,13 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    void addControlLabel (juce::Slider &slider, juce::Label &label, const juce::String &labelText, bool left);
+    void addControlLabel (juce::Slider &slider, juce::Label &label, const juce::String &labelText);
 
     void sliderValueChanged (juce::Slider* slider) override;
 private:
-    juce::Slider delayTimeSlider;
-    juce::Label  delayTimeLabel;
+    juce::Slider timeSlider, feedbackSlider, wetSlider, drySlider;
+    juce::Label  timeLabel,  feedbackLabel,  wetLabel,  dryLabel;
 
-    juce::Slider delayFeedbackSlider;
-    juce::Label  delayFeedbackLabel;
-
-    juce::Slider delayWetSlider;
-    juce::Label  delayWetLabel;
-
-    juce::Slider delayDrySlider;
-    juce::Label  delayDryLabel;
-
-    juce::Slider masterGainSlider;
-    juce::Label  masterGainLabel;
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     SimpleDelayAudioProcessor& audioProcessor;

@@ -55,11 +55,7 @@ public:
 
     float addDelay(int channel, float inputSample);
 
-    float delayTime;
-    float delayFeedback;
-    float delayWetLevel;
-    float delayDryLevel;
-    float masterGain;
+    float delayTime, delayFeedback, delayWetLevel, delayDryLevel;
 
 private:
     int sRate { 44100 };

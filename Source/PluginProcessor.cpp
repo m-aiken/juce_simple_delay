@@ -160,8 +160,6 @@ void SimpleDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
             smoother.getNextValue();
 
             channelDataWrite[i] = addDelay(channel, channelDataRead[i]);
-
-            channelDataWrite[i] *= juce::Decibels::decibelsToGain(masterGain);
         }
     }
 }
