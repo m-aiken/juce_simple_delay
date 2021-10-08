@@ -55,7 +55,9 @@ public:
 
     float addDelay(int channel, float inputSample);
 
-    float delayTime, delayFeedback, delayWetLevel, delayDryLevel;
+    static juce::AudioProcessorValueTreeState::ParameterLayout getParameterLayout();
+
+    juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", getParameterLayout()};
 
 private:
     int sRate { 44100 };

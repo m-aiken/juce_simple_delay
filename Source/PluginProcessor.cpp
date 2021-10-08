@@ -104,7 +104,7 @@ void SimpleDelayAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     delayLine.prepare(spec);
 
     smoother.reset(sampleRate, 0.001);
-    smoother.setCurrentAndTargetValue(delayTime);
+    smoother.setCurrentAndTargetValue(apvts.getRawParameterValue ("TIME")->load());
 }
 
 void SimpleDelayAudioProcessor::releaseResources()
@@ -145,7 +145,7 @@ void SimpleDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    smoother.setTargetValue(delayTime);
+    smoother.setTargetValue(apvts.getRawParameterValue ("TIME")->load());
 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
@@ -166,6 +166,11 @@ void SimpleDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 
 float SimpleDelayAudioProcessor::addDelay(int channel, float inputSample)
 {
+    auto delayTime     = apvts.getRawParameterValue ("TIME")->load();
+    auto delayFeedback = apvts.getRawParameterValue ("FEEDBACK")->load();
+    auto delayWetLevel = apvts.getRawParameterValue ("WET")->load();
+    auto delayDryLevel = apvts.getRawParameterValue ("DRY")->load();
+
     auto delaySample = delayLine.popSample (channel, static_cast<int> (sRate * (delayTime / 1000.f)));
 
     auto delayLineInputSample = std::tanh (inputSample + delayFeedback * delaySample);
@@ -201,6 +206,33 @@ void SimpleDelayAudioProcessor::setStateInformation (const void* data, int sizeI
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout SimpleDelayAudioProcessor::getParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("TIME",
+                                                           "Delay Time",
+                                                           juce::NormalisableRange<float>(0.f, 1000.f, 1.f),
+                                                           400.f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("FEEDBACK",
+                                                           "Feedback",
+                                                           juce::NormalisableRange<float>(0.f, 1.f, 0.01f),
+                                                           0.5f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("WET",
+                                                           "Wet",
+                                                           juce::NormalisableRange<float>(-60.f, 0.f, 1.f),
+                                                           -6.f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("DRY",
+                                                           "Dry",
+                                                           juce::NormalisableRange<float>(-60.f, 0.f, 1.f),
+                                                           -6.f));
+
+    return layout;
 }
 
 //==============================================================================
